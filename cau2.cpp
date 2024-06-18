@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <cmath>
 using namespace std;
 
 class Vemaybay {
@@ -8,18 +7,20 @@ private:
     string tenchuyen;
     string ngaybay;
     int giave;
+
 public:
     Vemaybay() : tenchuyen(""), ngaybay(""), giave(0) {}
-    Vemaybay(string tenchuyen, string ngaybay, int giave) 
+    Vemaybay(const string& tenchuyen, const string& ngaybay, int giave) 
         : tenchuyen(tenchuyen), ngaybay(ngaybay), giave(giave) {}
 
     ~Vemaybay() {}
 
     void Nhap() {
         cout << "Nhập tên chuyến: ";
-        cin >> tenchuyen;
+        cin.ignore();
+        getline(cin, tenchuyen);
         cout << "Nhập ngày bay: ";
-        cin >> ngaybay;
+        getline(cin, ngaybay);
         cout << "Nhập giá vé: ";
         cin >> giave;
     }
@@ -34,13 +35,14 @@ public:
 };
 
 class Nguoi {
-private:
+protected:
     string hoten;
     string gioitinh;
     int tuoi;
+
 public:
     Nguoi() : hoten(""), gioitinh(""), tuoi(0) {}
-    Nguoi(string hoten, string gioitinh, int tuoi) 
+    Nguoi(const string& hoten, const string& gioitinh, int tuoi) 
         : hoten(hoten), gioitinh(gioitinh), tuoi(tuoi) {}
 
     ~Nguoi() {}
@@ -50,8 +52,8 @@ public:
         cin.ignore();
         getline(cin, hoten);
         cout << "Nhập giới tính: ";
-        cin >> gioitinh;
-        cout << "nhập tuổi: ";
+        getline(cin, gioitinh);
+        cout << "Nhập tuổi: ";
         cin >> tuoi;
     }
 
@@ -62,13 +64,34 @@ public:
 
 class Hanhkhach : public Nguoi {
 private:
-    Vemaybay *ve;
+    Vemaybay* ve;
     int soluong;
+
 public:
     Hanhkhach() : Nguoi(), ve(nullptr), soluong(0) {}
-    Hanhkhach(string hoten, string gioitinh, int tuoi, int soluong) 
+    Hanhkhach(const string& hoten, const string& gioitinh, int tuoi, int soluong) 
         : Nguoi(hoten, gioitinh, tuoi), soluong(soluong) {
         ve = new Vemaybay[soluong];
+    }
+
+    Hanhkhach(const Hanhkhach& other) : Nguoi(other), soluong(other.soluong) {
+        ve = new Vemaybay[soluong];
+        for (int i = 0; i < soluong; ++i) {
+            ve[i] = other.ve[i];
+        }
+    }
+
+    Hanhkhach& operator=(const Hanhkhach& other) {
+        if (this != &other) {
+            Nguoi::operator=(other);
+            soluong = other.soluong;
+            delete[] ve;
+            ve = new Vemaybay[soluong];
+            for (int i = 0; i < soluong; ++i) {
+                ve[i] = other.ve[i];
+            }
+        }
+        return *this;
     }
 
     ~Hanhkhach() {
@@ -120,6 +143,7 @@ int main() {
         cout << "Tổng tiền: " << dsHanhkhach[i].tongtien() << endl;
     }
 
+    // Sắp xếp danh sách hành khách giảm dần theo tổng tiền vé
     for (int i = 0; i < n - 1; ++i) {
         for (int j = i + 1; j < n; ++j) {
             if (dsHanhkhach[i].tongtien() < dsHanhkhach[j].tongtien()) {
@@ -130,7 +154,7 @@ int main() {
         }
     }
 
-    cout << "Danh sách khành khách sau khi sắp xếp giảm dần tổng tiền:\n";
+    cout << "Danh sách hành khách sau khi sắp xếp giảm dần theo tổng tiền:\n";
     for (int i = 0; i < n; ++i) {
         cout << "Thông tin hành khách thứ " << i + 1 << ":\n";
         dsHanhkhach[i].Xuat();
